@@ -82,3 +82,13 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Revisé el diff y acepté: cumple el diseño del SDD (persistencia encapsulada, path inyectable). Claude Code verificó con pytest que instaló por su cuenta; decidí re-verificar yo con unittest, que es el estándar del proyecto
 **Cambios realizados:** backend/context_store.py implementado (42 líneas)
 **Verificación:** py -m unittest discover -s tests/unit → Ran 5 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK (no se rompió nada del proyecto base)
+
+
+## Prompt 9 
+**Objetivo:** Crear las pruebas unitarias de apply_context (TDD, fase roja)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Seguimos con TDD estricto. NO implementes nada, solo pruebas. Crea tests/unit/test_cag.py para apply_context(user_id, question, base_answer, context_items): sin contexto retorna base_answer exacto; con contexto el resultado contiene el base_answer Y los values de cada ítem; con múltiples ítems aparecen todos los values; el resultado siempre es string. unittest, NO modifiques cag.py"
+**Respuesta recibida:** Creó tests/unit/test_cag.py con 12 pruebas en 4 clases (sin contexto, un ítem, múltiples ítems, tipo de retorno)
+**Decisión humana:** Revisé el diff y acepté. Noté que las pruebas de "sin contexto" pasan desde ya porque ese comportamiento existe en el esqueleto; las 4 que exigen inyectar contexto son las que definen el trabajo pendiente
+**Cambios realizados:** tests/unit/test_cag.py creado (12 pruebas)
+**Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, FAILED (failures=4). Las 5 de ContextStore siguen OK; fallan solo las que requieren inyección de contexto
