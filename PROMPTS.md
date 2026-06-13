@@ -101,3 +101,32 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Revisé el diff y acepté: es la solución mínima que cumple el contrato, coherente con el SDD. La nota anexada garantiza que el value del contexto aparezca en el answer, requisito del test 3 de validación
 **Cambios realizados:** backend/cag.py implementado
 **Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK
+
+
+## Prompt 11 
+**Objetivo:** Integrar el CAG en assistant.py y verificar server.py (Sprint 3)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Conecta el módulo CAG: en answer_question consulta list_for_user, pasa la respuesta por apply_context y rellena context_used con las keys. Revisa server.py para /api/context. No toques knowledge.py ni las pruebas"
+**Respuesta recibida:** Modificó assistant.py (importa apply_context y ContextStore, integra contexto en ambas ramas del flujo, rellena context_used). Reportó que server.py ya estaba correcto
+**Decisión humana:** Revisé ambos archivos y detecté un bug de diseño: server.py y assistant.py creaban instancias separadas de ContextStore, y list_for_user solo leía de memoria, por lo que una instancia no vería lo guardado por la otra
+**Cambios realizados:** backend/assistant.py integrado con el CAG
+**Verificación:** Identifiqué el riesgo antes de probar; escribí una prueba que reproduce el bug (ver Prompt 12)
+
+## Prompt 12 
+**Objetivo:** Corregir el bug de sincronización entre instancias de ContextStore (TDD rojo→verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** Fase roja: prueba donde una instancia B (creada antes del save) debe ver lo que instancia A guardó. Fase verde: que list_for_user y save recarguen del disco
+**Respuesta recibida:** La prueba roja falló confirmando el bug ({"key":"k","value":"v"} not found in []); el fix hizo que ambos métodos relean el archivo antes de operar
+**Decisión humana:** Elegí releer del disco en cada operación (encapsulado en ContextStore) en lugar de compartir una instancia global, para no acoplar server.py y assistant.py y mantener la persistencia aislada según el SDD
+**Cambios realizados:** backend/context_store.py corregido; prueba de sincronización agregada a tests/unit/test_context_store.py
+**Verificación:** py -m unittest: tests/unit Ran 18 OK, tests/base Ran 3 OK, tests/validation Ran 3 OK (las 3 pruebas de validación del profesor pasan)
+
+
+## Prompt 13 — 2026-06-12
+**Objetivo:** Estructurar el README final como guía del informe para el evaluador
+**Herramienta:** Claude (chat)
+**Prompt usado:** Pedí un README ordenado que sirva de índice del informe, con tabla de navegación a cada requisito y el link del repositorio
+**Respuesta recibida:** README con guía rápida para el evaluador (tabla requisito→ubicación), problema/solución, arquitectura, resultados de pruebas, ejecución, metodología Scrum y estructura
+**Decisión humana:** Adopté la estructura y verifiqué que cada enlace apunta a un archivo real del repositorio (SDD, BDD, scrum, PROMPTS, evidencias)
+**Cambios realizados:** README.md reescrito
+**Verificación:** Revisé que las rutas de la tabla existen y que los resultados de pruebas coinciden con las ejecuciones reales (3/18/3 OK)

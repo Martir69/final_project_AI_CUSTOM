@@ -77,5 +77,29 @@ class TestContextStorePersistence(unittest.TestCase):
         self.assertIn({"key": "semester", "value": "ninth"}, entries)
 
 
+class TestContextStoreCrossInstanceSync(unittest.TestCase):
+    """Reproduce el bug: dos instancias sobre el mismo archivo no comparten estado en memoria."""
+
+    def setUp(self):
+        self.tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        self.tmp.close()
+
+    def tearDown(self):
+        os.unlink(self.tmp.name)
+
+    def test_instance_b_sees_save_made_by_instance_a_after_b_was_created(self):
+        # Simula server.py y assistant.py arrancando a la vez (ambas instancias
+        # cargan el archivo vacío en __init__).
+        instance_a = ContextStore(path=self.tmp.name)
+        instance_b = ContextStore(path=self.tmp.name)
+
+        # A escribe después de que B ya cargó su snapshot vacío.
+        instance_a.save("user1", "k", "v")
+
+        # B debería leer del disco, no de su caché en memoria.
+        entries = instance_b.list_for_user("user1")
+        self.assertIn({"key": "k", "value": "v"}, entries)
+
+
 if __name__ == "__main__":
     unittest.main()
