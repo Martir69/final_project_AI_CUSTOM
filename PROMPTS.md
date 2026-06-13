@@ -54,3 +54,12 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Elegí archivo JSON en data/ porque cumple el requisito de persistencia, mantiene la coherencia arquitectónica del proyecto base y deja la persistencia encapsulada en ContextStore (migrable a SQLite sin afectar al resto del sistema). Además decidí que el constructor de ContextStore reciba la ruta del archivo como parámetro, para que las pruebas unitarias usen archivos temporales y no toquen data/
 **Cambios realizados:** docs/SDD.md con la decisión justificada, docs/BDD.md con escenarios Gherkin, cierre de Sprint 1 en docs/scrum/sprint-1.md
 **Verificación:** Revisé que el diseño del SDD cubre punto por punto el contrato de tests/validation/test_cag_contract.py (rutas, códigos HTTP y campos JSON)
+
+## Prompt 6 — 2026-06-12
+**Objetivo:** Diagnosticar por qué PROMPTS.md no aparecía en GitHub
+**Herramienta:** Claude (chat)
+**Prompt usado:** Reporté que VS Code mostraba el archivo pero GitHub Desktop no detectaba cambios y la web no lo mostraba; compartí el contenido de .gitignore
+**Respuesta recibida:** El .gitignore del proyecto base incluye la línea PROMPTS.md (pensada para los archivos del instructor), por lo que git ignoraba mi archivo
+**Decisión humana:** Eliminé únicamente esa línea del .gitignore en mi fork, porque el examen exige PROMPTS.md dentro del repositorio; conservé el resto de exclusiones del instructor
+**Cambios realizados:** .gitignore modificado; PROMPTS.md ahora versionado
+**Verificación:** PROMPTS.md visible en la raíz del repo en GitHub tras el push
