@@ -31,6 +31,7 @@ class ContextStore:
 
     def save(self, user_id, key, value):
         """Agrega un ítem {key, value} al usuario y persiste en disco. Retorna el ítem."""
+        self._data = self._load()
         item = {"key": key, "value": value}
         self._data.setdefault(user_id, []).append(item)
         self._persist()
@@ -38,4 +39,5 @@ class ContextStore:
 
     def list_for_user(self, user_id):
         """Retorna la lista de entradas del usuario o [] si no existe."""
+        self._data = self._load()
         return self._data.get(user_id, [])
