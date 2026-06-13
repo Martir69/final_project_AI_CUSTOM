@@ -55,7 +55,7 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Cambios realizados:** docs/SDD.md con la decisión justificada, docs/BDD.md con escenarios Gherkin, cierre de Sprint 1 en docs/scrum/sprint-1.md
 **Verificación:** Revisé que el diseño del SDD cubre punto por punto el contrato de tests/validation/test_cag_contract.py (rutas, códigos HTTP y campos JSON)
 
-## Prompt 6 — 2026-06-12
+## Prompt 6 
 **Objetivo:** Diagnosticar por qué PROMPTS.md no aparecía en GitHub
 **Herramienta:** Claude (chat)
 **Prompt usado:** Reporté que VS Code mostraba el archivo pero GitHub Desktop no detectaba cambios y la web no lo mostraba; compartí el contenido de .gitignore
@@ -63,3 +63,22 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Eliminé únicamente esa línea del .gitignore en mi fork, porque el examen exige PROMPTS.md dentro del repositorio; conservé el resto de exclusiones del instructor
 **Cambios realizados:** .gitignore modificado; PROMPTS.md ahora versionado
 **Verificación:** PROMPTS.md visible en la raíz del repo en GitHub tras el push
+
+## Prompt 7 
+**Objetivo:** Crear las pruebas unitarias de ContextStore (TDD, fase roja)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Vamos a trabajar con TDD estricto. NO implementes nada todavía. Crea tests/unit/test_context_store.py con pruebas para: save retorna truthy, list_for_user devuelve formato [{key, value}], usuario sin contexto devuelve [], aislamiento entre usuarios, y persistencia real entre dos instancias con el mismo path. Constructor con path para usar tempfile. unittest, no pytest"
+**Respuesta recibida:** Creó tests/unit/__init__.py y test_context_store.py con 5 pruebas en 4 clases, usando NamedTemporaryFile en setUp/tearDown para no tocar data/
+**Decisión humana:** Revisé el diff y acepté las pruebas: cubren los 5 casos pedidos y definen el contrato ContextStore(path=...). No permití que implementara context_store.py todavía (fase roja primero)
+**Cambios realizados:** tests/unit/__init__.py y tests/unit/test_context_store.py creados
+**Verificación:** Ejecuté py -m unittest discover -s tests/unit → Ran 5 tests, FAILED (errors=5). Fallan con TypeError porque el esqueleto no acepta path; los imports funcionan, el rojo es el esperado
+
+
+## Prompt 8 
+**Objetivo:** Implementar ContextStore para pasar las pruebas (TDD, fase verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Fase verde del TDD. Implementa backend/context_store.py para que pasen las 5 pruebas. Constructor con path='data/context_store.json' por defecto, persistencia JSON {user_id: [{key, value}]}, save agrega y persiste retornando el ítem, list_for_user retorna [] si no existe, archivo inexistente o vacío se trata como {} sin error. Solo librería estándar. NO modifiques pruebas ni otros archivos"
+**Respuesta recibida:** Implementó ContextStore con métodos privados _load (tolera archivo inexistente/corrupto) y _persist (crea el directorio si hace falta), save y list_for_user según el contrato
+**Decisión humana:** Revisé el diff y acepté: cumple el diseño del SDD (persistencia encapsulada, path inyectable). Claude Code verificó con pytest que instaló por su cuenta; decidí re-verificar yo con unittest, que es el estándar del proyecto
+**Cambios realizados:** backend/context_store.py implementado (42 líneas)
+**Verificación:** py -m unittest discover -s tests/unit → Ran 5 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK (no se rompió nada del proyecto base)

@@ -5,11 +5,13 @@ TDD (rojo → verde) en la rama feature/cag.
 
 ## Planificación
 - [x] Crear rama feature/cag
-- [ ] Pruebas unitarias de ContextStore (fase roja)
-- [ ] Implementar ContextStore.save y list_for_user (fase verde)
+- [x] Pruebas unitarias de ContextStore (fase roja)
+- [x] Implementar ContextStore.save y list_for_user (fase verde)
 - [ ] Pruebas unitarias de apply_context (fase roja)
 - [ ] Implementar apply_context (fase verde)
 - [ ] Confirmar que las pruebas base siguen pasando
 
 ## Evidencias
-(se agregan durante el sprint)
+
+![Fase roja ContextStore](../evidencias/05-tdd-context-store-rojo.png)
+![Fase verde ContextStore](../evidencias/06-tdd-context-store-verde.png)
