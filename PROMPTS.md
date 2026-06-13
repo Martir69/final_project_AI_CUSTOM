@@ -92,3 +92,12 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Revisé el diff y acepté. Noté que las pruebas de "sin contexto" pasan desde ya porque ese comportamiento existe en el esqueleto; las 4 que exigen inyectar contexto son las que definen el trabajo pendiente
 **Cambios realizados:** tests/unit/test_cag.py creado (12 pruebas)
 **Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, FAILED (failures=4). Las 5 de ContextStore siguen OK; fallan solo las que requieren inyección de contexto
+
+## Prompt 10 
+**Objetivo:** Implementar apply_context para pasar las pruebas (TDD, fase verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Fase verde del TDD. Implementa apply_context en backend/cag.py para que pasen las 12 pruebas: sin contexto retorna base_answer exacto; con contexto retorna base_answer seguido de una nota con los values de todos los ítems. Siempre string. NO modifiques pruebas ni otros archivos"
+**Respuesta recibida:** Implementación de 4 líneas: si no hay contexto retorna base_answer intacto; si hay, une los values con "; " y los anexa como "(Adaptado al contexto del usuario: ...)"
+**Decisión humana:** Revisé el diff y acepté: es la solución mínima que cumple el contrato, coherente con el SDD. La nota anexada garantiza que el value del contexto aparezca en el answer, requisito del test 3 de validación
+**Cambios realizados:** backend/cag.py implementado
+**Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK
