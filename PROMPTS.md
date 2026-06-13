@@ -55,7 +55,7 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Cambios realizados:** docs/SDD.md con la decisión justificada, docs/BDD.md con escenarios Gherkin, cierre de Sprint 1 en docs/scrum/sprint-1.md
 **Verificación:** Revisé que el diseño del SDD cubre punto por punto el contrato de tests/validation/test_cag_contract.py (rutas, códigos HTTP y campos JSON)
 
-## Prompt 6 — 2026-06-12
+## Prompt 6 
 **Objetivo:** Diagnosticar por qué PROMPTS.md no aparecía en GitHub
 **Herramienta:** Claude (chat)
 **Prompt usado:** Reporté que VS Code mostraba el archivo pero GitHub Desktop no detectaba cambios y la web no lo mostraba; compartí el contenido de .gitignore
@@ -63,3 +63,70 @@ en lugar de cambiar de terminal o modificar alias del sistema
 **Decisión humana:** Eliminé únicamente esa línea del .gitignore en mi fork, porque el examen exige PROMPTS.md dentro del repositorio; conservé el resto de exclusiones del instructor
 **Cambios realizados:** .gitignore modificado; PROMPTS.md ahora versionado
 **Verificación:** PROMPTS.md visible en la raíz del repo en GitHub tras el push
+
+## Prompt 7 
+**Objetivo:** Crear las pruebas unitarias de ContextStore (TDD, fase roja)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Vamos a trabajar con TDD estricto. NO implementes nada todavía. Crea tests/unit/test_context_store.py con pruebas para: save retorna truthy, list_for_user devuelve formato [{key, value}], usuario sin contexto devuelve [], aislamiento entre usuarios, y persistencia real entre dos instancias con el mismo path. Constructor con path para usar tempfile. unittest, no pytest"
+**Respuesta recibida:** Creó tests/unit/__init__.py y test_context_store.py con 5 pruebas en 4 clases, usando NamedTemporaryFile en setUp/tearDown para no tocar data/
+**Decisión humana:** Revisé el diff y acepté las pruebas: cubren los 5 casos pedidos y definen el contrato ContextStore(path=...). No permití que implementara context_store.py todavía (fase roja primero)
+**Cambios realizados:** tests/unit/__init__.py y tests/unit/test_context_store.py creados
+**Verificación:** Ejecuté py -m unittest discover -s tests/unit → Ran 5 tests, FAILED (errors=5). Fallan con TypeError porque el esqueleto no acepta path; los imports funcionan, el rojo es el esperado
+
+
+## Prompt 8 
+**Objetivo:** Implementar ContextStore para pasar las pruebas (TDD, fase verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Fase verde del TDD. Implementa backend/context_store.py para que pasen las 5 pruebas. Constructor con path='data/context_store.json' por defecto, persistencia JSON {user_id: [{key, value}]}, save agrega y persiste retornando el ítem, list_for_user retorna [] si no existe, archivo inexistente o vacío se trata como {} sin error. Solo librería estándar. NO modifiques pruebas ni otros archivos"
+**Respuesta recibida:** Implementó ContextStore con métodos privados _load (tolera archivo inexistente/corrupto) y _persist (crea el directorio si hace falta), save y list_for_user según el contrato
+**Decisión humana:** Revisé el diff y acepté: cumple el diseño del SDD (persistencia encapsulada, path inyectable). Claude Code verificó con pytest que instaló por su cuenta; decidí re-verificar yo con unittest, que es el estándar del proyecto
+**Cambios realizados:** backend/context_store.py implementado (42 líneas)
+**Verificación:** py -m unittest discover -s tests/unit → Ran 5 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK (no se rompió nada del proyecto base)
+
+
+## Prompt 9 
+**Objetivo:** Crear las pruebas unitarias de apply_context (TDD, fase roja)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Seguimos con TDD estricto. NO implementes nada, solo pruebas. Crea tests/unit/test_cag.py para apply_context(user_id, question, base_answer, context_items): sin contexto retorna base_answer exacto; con contexto el resultado contiene el base_answer Y los values de cada ítem; con múltiples ítems aparecen todos los values; el resultado siempre es string. unittest, NO modifiques cag.py"
+**Respuesta recibida:** Creó tests/unit/test_cag.py con 12 pruebas en 4 clases (sin contexto, un ítem, múltiples ítems, tipo de retorno)
+**Decisión humana:** Revisé el diff y acepté. Noté que las pruebas de "sin contexto" pasan desde ya porque ese comportamiento existe en el esqueleto; las 4 que exigen inyectar contexto son las que definen el trabajo pendiente
+**Cambios realizados:** tests/unit/test_cag.py creado (12 pruebas)
+**Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, FAILED (failures=4). Las 5 de ContextStore siguen OK; fallan solo las que requieren inyección de contexto
+
+## Prompt 10 
+**Objetivo:** Implementar apply_context para pasar las pruebas (TDD, fase verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Fase verde del TDD. Implementa apply_context en backend/cag.py para que pasen las 12 pruebas: sin contexto retorna base_answer exacto; con contexto retorna base_answer seguido de una nota con los values de todos los ítems. Siempre string. NO modifiques pruebas ni otros archivos"
+**Respuesta recibida:** Implementación de 4 líneas: si no hay contexto retorna base_answer intacto; si hay, une los values con "; " y los anexa como "(Adaptado al contexto del usuario: ...)"
+**Decisión humana:** Revisé el diff y acepté: es la solución mínima que cumple el contrato, coherente con el SDD. La nota anexada garantiza que el value del contexto aparezca en el answer, requisito del test 3 de validación
+**Cambios realizados:** backend/cag.py implementado
+**Verificación:** py -m unittest discover -s tests/unit → Ran 17 tests, OK. py -m unittest discover -s tests/base → Ran 3 tests, OK
+
+
+## Prompt 11 
+**Objetivo:** Integrar el CAG en assistant.py y verificar server.py (Sprint 3)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** "Conecta el módulo CAG: en answer_question consulta list_for_user, pasa la respuesta por apply_context y rellena context_used con las keys. Revisa server.py para /api/context. No toques knowledge.py ni las pruebas"
+**Respuesta recibida:** Modificó assistant.py (importa apply_context y ContextStore, integra contexto en ambas ramas del flujo, rellena context_used). Reportó que server.py ya estaba correcto
+**Decisión humana:** Revisé ambos archivos y detecté un bug de diseño: server.py y assistant.py creaban instancias separadas de ContextStore, y list_for_user solo leía de memoria, por lo que una instancia no vería lo guardado por la otra
+**Cambios realizados:** backend/assistant.py integrado con el CAG
+**Verificación:** Identifiqué el riesgo antes de probar; escribí una prueba que reproduce el bug (ver Prompt 12)
+
+## Prompt 12 
+**Objetivo:** Corregir el bug de sincronización entre instancias de ContextStore (TDD rojo→verde)
+**Herramienta:** Claude Code (VS Code)
+**Prompt usado:** Fase roja: prueba donde una instancia B (creada antes del save) debe ver lo que instancia A guardó. Fase verde: que list_for_user y save recarguen del disco
+**Respuesta recibida:** La prueba roja falló confirmando el bug ({"key":"k","value":"v"} not found in []); el fix hizo que ambos métodos relean el archivo antes de operar
+**Decisión humana:** Elegí releer del disco en cada operación (encapsulado en ContextStore) en lugar de compartir una instancia global, para no acoplar server.py y assistant.py y mantener la persistencia aislada según el SDD
+**Cambios realizados:** backend/context_store.py corregido; prueba de sincronización agregada a tests/unit/test_context_store.py
+**Verificación:** py -m unittest: tests/unit Ran 18 OK, tests/base Ran 3 OK, tests/validation Ran 3 OK (las 3 pruebas de validación del profesor pasan)
+
+
+## Prompt 13 — 2026-06-12
+**Objetivo:** Estructurar el README final como guía del informe para el evaluador
+**Herramienta:** Claude (chat)
+**Prompt usado:** Pedí un README ordenado que sirva de índice del informe, con tabla de navegación a cada requisito y el link del repositorio
+**Respuesta recibida:** README con guía rápida para el evaluador (tabla requisito→ubicación), problema/solución, arquitectura, resultados de pruebas, ejecución, metodología Scrum y estructura
+**Decisión humana:** Adopté la estructura y verifiqué que cada enlace apunta a un archivo real del repositorio (SDD, BDD, scrum, PROMPTS, evidencias)
+**Cambios realizados:** README.md reescrito
+**Verificación:** Revisé que las rutas de la tabla existen y que los resultados de pruebas coinciden con las ejecuciones reales (3/18/3 OK)
