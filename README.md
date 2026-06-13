@@ -6,21 +6,34 @@
 
 ---
 
-## Guía rápida para el evaluador
+## Índice de la documentación (informe)
 
-Todo el trabajo del examen está organizado en estos documentos:
+### Diseño y comportamiento
+- [Documento de diseño (SDD)](docs/SDD.md) — arquitectura y decisiones
+- [Escenarios BDD (Gherkin)](docs/BDD.md) — comportamiento esperado
 
-| Requisito | Dónde encontrarlo |
-|-----------|-------------------|
-| Fork público | Etiqueta "forked from rortizs/..." en este repo |
-| Diseño de la solución (SDD) | docs/SDD.md |
-| Escenarios BDD (Gherkin) | docs/BDD.md |
-| Scrum: backlog y 4 sprints | docs/scrum/ |
-| Registro cronológico de IA | PROMPTS.md |
-| Evidencias (capturas) | docs/evidencias/ |
-| Pruebas propias del CAG | tests/unit/ |
-| Pull Request revisado y merge | Pestaña Pull requests del repo |
+### Gestión Scrum
+- [Product Backlog](docs/scrum/backlog.md)
+- [Sprint 1 — Análisis y diseño](docs/scrum/sprint-1.md)
+- [Sprint 2 — Implementación TDD](docs/scrum/sprint-2.md)
+- [Sprint 3 — Integración](docs/scrum/sprint-3.md)
+- [Sprint 4 — Validación, PR y cierre](docs/scrum/sprint-4.md)
 
+### Uso de IA
+- [PROMPTS.md — registro cronológico](PROMPTS.md)
+
+### Evidencias (capturas)
+- [Carpeta completa de evidencias](docs/evidencias/)
+- [01 — Fork creado](docs/evidencias/01-fork-creado.png)
+- [02 — Clone del fork](docs/evidencias/02-clone.png)
+- [03 — Pruebas base OK](docs/evidencias/03-pruebas-base.png)
+- [05 — TDD ContextStore (fase roja)](docs/evidencias/05-tdd-context-store-rojo.png)
+- [06 — TDD ContextStore (fase verde)](docs/evidencias/06-tdd-context-store-verde.png)
+- [07 — TDD apply_context (fase roja)](docs/evidencias/07-tdd-cag-rojo.png)
+- [08 — TDD apply_context (fase verde)](docs/evidencias/08-tdd-cag-verde.png)
+- [09 — Validación final OK](docs/evidencias/09-validacion-ok.png)
+- [11 — App funcionando con contexto](docs/evidencias/11-app-funcionando.png)
+- [12 — App sin contexto (comparativa)](docs/evidencias/12-app-sin-contexto.png)
 ---
 
 ## 1. Problema y solución
@@ -39,7 +52,7 @@ Se integró la capa CAG, que guarda, recupera y utiliza contexto persistente:
                                |- context_store.py (CAG) -> contexto del usuario
                                |- cag.py (CAG) -> respuesta aumentada + context_used
 
-Decisión de diseño clave (detalle en docs/SDD.md): la persistencia se hizo en archivo JSON por coherencia con el proyecto base y queda encapsulada en ContextStore. Durante la integración se detectó y corrigió por TDD un bug de sincronización entre instancias (ver PROMPTS.md, prompts 11 y 12).
+Decisión de diseño clave (detalle en [docs/SDD.md](docs/SDD.md)): la persistencia se hizo en archivo JSON por coherencia con el proyecto base y queda encapsulada en ContextStore. Durante la integración se detectó y corrigió por TDD un bug de sincronización entre instancias (ver [PROMPTS.md](PROMPTS.md), prompts 11 y 12).
 
 ## 3. Resultados de pruebas
 
@@ -48,6 +61,8 @@ Decisión de diseño clave (detalle en docs/SDD.md): la persistencia se hizo en 
 | tests/base/ (proyecto base) | 3 pruebas OK |
 | tests/unit/ (CAG, propias) | 18 pruebas OK |
 | tests/validation/ (contrato final) | 3 pruebas OK |
+
+Evidencia: [09-validacion-ok.png](docs/evidencias/09-validacion-ok.png)
 
 ## 4. Cómo ejecutar
 
@@ -69,13 +84,11 @@ Disponible en http://127.0.0.1:8000. El frontend se abre con frontend/index.html
 
 ## 5. Metodología
 
-Trabajo organizado con Scrum en 4 sprints:
+Trabajo organizado con Scrum en 4 sprints (TDD, ciclos rojo->verde):
 - Sprint 1: Análisis y diseño (SDD, BDD)
 - Sprint 2: Implementación TDD del módulo CAG (ContextStore, apply_context)
 - Sprint 3: Integración en assistant.py y corrección de bug
 - Sprint 4: Validación final, Pull Request y documentación
-
-Detalle de cada sprint en docs/scrum/.
 
 ## 6. Estructura del repositorio
 
@@ -83,7 +96,7 @@ Detalle de cada sprint en docs/scrum/.
 |------|-----------|
 | backend/ | Servidor, RAG y módulo CAG |
 | frontend/ | Interfaz web |
-| data/ | Base de conocimiento y contexto persistido |
+| data/ | Base de conocimiento (el contexto se genera en runtime) |
 | tests/base/ | Pruebas base del proyecto |
 | tests/unit/ | Pruebas unitarias propias del CAG |
 | tests/validation/ | Pruebas de validación final |

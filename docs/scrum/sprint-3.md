@@ -24,3 +24,5 @@ con las 18 unitarias propias y las 3 base. El RAG no se modificó.
 
 ## Evidencias
 ![Validación final OK](../evidencias/09-validacion-ok.png)
+![App funcionando con contexto](../evidencias/11-app-funcionando.png)
+![App sin contexto - comparativa](../evidencias/12-app-sin-contexto.png)
